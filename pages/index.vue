@@ -4,14 +4,14 @@
 
         <!-- 検索フォーム -->
         <div>
-            <!-- リポジトリ名用の入力フィールド -->
             <input v-model="title" type="text" placeholder="リポジトリ名 (例: vue)" />
-
-            <!-- 使用言語用の入力フィールド -->
             <input v-model="language" type="text" placeholder="言語 (例: javascript)" />
-
-            <!-- 検索ボタン -->
             <button @click="searchRepos">検索</button>
+        </div>
+
+        <!-- エラーメッセージ -->
+        <div v-if="errorMessage" style="color: red; margin-top: 10px;">
+            {{ errorMessage }}
         </div>
 
         <!-- 検索結果リスト -->
@@ -25,6 +25,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
 // フォーム入力されたリポジトリ名と使用言語
 const title = ref('')
@@ -33,15 +34,36 @@ const language = ref('')
 // 検索結果を格納する配列
 const repos = ref([])
 
-// 「検索」ボタンが押されたときのメソッド
-const searchRepos = () => {
-    // まだAPI連携はしないので、テストとしてアラートを出す
-    alert(`リポジトリ名: ${title.value}, 言語: ${language.value}`)
+// エラーメッセージ
+const errorMessage = ref('')
 
-    // 仮の検索結果を設定 (後でAPIからの実データに差し替え予定)
-    repos.value = [
-        { id: 1, full_name: 'sample/repo1' },
-        { id: 2, full_name: 'sample/repo2' }
-    ]
+// 検索ボタンが押されたときの処理
+const searchRepos = async () => {
+    // 入力チェック
+    if (!title.value && !language.value) {
+        errorMessage.value = 'リポジトリ名または言語を入力してください。'
+        return
+    }
+
+    // エラーがなければメッセージをリセット
+    errorMessage.value = ''
+
+    try {
+        let q = 'in:name'
+        if (title.value) {
+            q += `+${title.value}`
+        }
+        if (language.value) {
+            q += `+language:${language.value}`
+        }
+        q += '+is:public'
+
+        const url = `https://api.github.com/search/repositories?q=${q}`
+        const res = await axios.get(url)
+        repos.value = res.data.items
+    } catch (error) {
+        console.error(error)
+        errorMessage.value = '検索中にエラーが発生しました。時間をおいて再試行してください。'
+    }
 }
 </script>
