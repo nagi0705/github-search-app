@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./pages/**/*.{vue,js}', './components/**/*.{vue,js}'], // Tailwindが適用されるファイル
+  content: ['./pages/**/*.{vue,js}', './components/**/*.{vue,js}'],
   theme: {
-    extend: {}, // 必要であればここでカスタマイズ
+    extend: {},
   },
   plugins: [],
 }

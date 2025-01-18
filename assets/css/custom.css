@@ -1,0 +1,9 @@
+/* カスタム背景グラデーション */
+.custom-gradient {
+    background: linear-gradient(to top, #1a2980, #26d0ce);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+}

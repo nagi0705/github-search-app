@@ -1,6 +1,5 @@
 <template>
-    <div
-        class="h-screen bg-gradient-to-t from-indigo-500 via-teal-500 to-cyan-400 flex flex-col justify-between text-white">
+    <div class="custom-gradient">
         <div class="container mx-auto py-10">
             <h1 class="text-4xl font-bold text-center mb-10">GitHub リポジトリ検索</h1>
 
