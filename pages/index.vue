@@ -1,15 +1,17 @@
 <template>
-    <div class="custom-gradient">
-        <div class="container mx-auto py-10">
-            <h1 class="text-4xl font-bold text-center mb-10">GitHub リポジトリ検索</h1>
+    <div
+        class="min-h-screen bg-gradient-to-t from-indigo-500 via-teal-500 to-cyan-400 flex flex-col justify-between text-white">
+        <div class="container mx-auto px-4 py-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6">GitHub リポジトリ検索</h1>
 
             <!-- 検索フォーム -->
-            <div class="flex justify-center gap-4 mb-6">
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
                 <input v-model="title" type="text" placeholder="リポジトリ名 (例: vue)"
-                    class="p-2 rounded bg-white text-black" />
+                    class="w-full sm:w-auto p-2 rounded bg-white text-black" />
                 <input v-model="language" type="text" placeholder="言語 (例: javascript)"
-                    class="p-2 rounded bg-white text-black" />
-                <button @click="searchRepos(1)" class="bg-stone-500 text-white px-4 py-2 rounded hover:bg-rose-600">
+                    class="w-full sm:w-auto p-2 rounded bg-white text-black" />
+                <button @click="searchRepos(1)"
+                    class="w-full sm:w-auto bg-stone-500 text-white px-4 py-2 rounded hover:bg-rose-600">
                     検索
                 </button>
             </div>
@@ -22,17 +24,17 @@
             <!-- 検索結果リスト -->
             <ul class="space-y-4">
                 <li v-for="repo in repos" :key="repo.id" class="bg-white text-black p-4 rounded shadow hover:shadow-lg">
-                    <a :href="repo.html_url" target="_blank" class="text-blue-600 font-semibold">
+                    <a :href="repo.html_url" target="_blank" class="text-blue-600 font-semibold block">
                         {{ repo.full_name }}
                     </a>
-                    <div>
+                    <div class="mt-2">
                         ⭐ {{ repo.stargazers_count }} | 🍴 {{ repo.forks_count }}
                     </div>
                 </li>
             </ul>
 
             <!-- ページネーション -->
-            <div v-if="repos.length > 0" class="flex justify-center gap-4 mt-6">
+            <div v-if="repos.length > 0" class="flex justify-center items-center gap-4 mt-6 flex-wrap">
                 <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)"
                     class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 disabled:bg-gray-200">
                     前へ
