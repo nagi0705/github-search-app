@@ -10,6 +10,8 @@
                     class="w-full sm:w-auto p-2 rounded bg-white text-black" />
                 <input v-model="language" type="text" placeholder="言語 (例: javascript)"
                     class="w-full sm:w-auto p-2 rounded bg-white text-black" />
+                <input v-model="username" type="text" placeholder="ユーザー名 (例: torvalds)"
+                    class="w-full sm:w-auto p-2 rounded bg-white text-black" />
                 <button @click="searchRepos(1)"
                     class="w-full sm:w-auto bg-stone-500 text-white px-4 py-2 rounded hover:bg-rose-600">
                     検索
@@ -30,11 +32,15 @@
 
             <!-- 並べ替えボタン -->
             <div class="flex justify-center items-center gap-4 mb-6">
-                <button @click="sortByStars" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-teal-600">
+                <button @click="sortByStars" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
                     ⭐ 星の数降順で並べ替え
                 </button>
                 <button @click="sortByForks" class="bg-green-500 text-black px-4 py-2 rounded hover:bg-green-600">
                     🍴 フォーク数降順で並べ替え
+                </button>
+                <button @click="sortByCreatedDate"
+                    class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    📅 作成日降順で並べ替え
                 </button>
                 <button @click="resetToDefault" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                     🔄 デフォルト順に戻す
@@ -48,14 +54,12 @@
             <p v-if="isSortedByForks" class="text-center text-sm mt-2">
                 現在、🍴 フォーク数降順で表示中です。
             </p>
+            <p v-if="isSortedByCreatedDate" class="text-center text-sm mt-2">
+                現在、📅 作成日降順で表示中です。
+            </p>
             <p v-if="isDefaultOrder" class="text-center text-sm mt-2">
                 現在、🔄 デフォルト順で表示中です。
             </p>
-
-            <!-- エラーメッセージ -->
-            <div v-if="errorMessage" class="text-center text-red-400 mb-4">
-                {{ errorMessage }}
-            </div>
 
             <!-- ヒット件数表示 -->
             <div v-if="totalCount > 0" class="text-center text-sm text-white mb-4">
@@ -70,7 +74,8 @@
                         {{ repo.full_name }}
                     </a>
                     <div class="mt-2">
-                        ⭐ {{ repo.stargazers_count }} | 🍴 {{ repo.forks_count }}
+                        ⭐ {{ repo.stargazers_count }} | 🍴 {{ repo.forks_count }} | 📅 作成日:
+                        {{ new Date(repo.created_at).toLocaleDateString() }}
                     </div>
                 </li>
             </ul>
@@ -99,11 +104,12 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
-// フォーム入力されたリポジトリ名と使用言語
+// 検索フォーム入力
 const title = ref('')
 const language = ref('')
+const username = ref('') // ユーザー名検索用
 
-// 検索結果を格納する配列
+// 検索結果リスト
 const repos = ref([])
 
 // エラーメッセージ
@@ -113,44 +119,39 @@ const errorMessage = ref('')
 const currentPage = ref(1)
 
 // 1ページあたりの表示件数
-const itemsPerPage = ref(30) // デフォルトは30件
+const itemsPerPage = ref(30)
 
-// 合計ヒット件数
+// 検索結果の総件数
 const totalCount = ref(0)
 
 // 並び替えフラグ
 const isSortedByStars = ref(false)
 const isSortedByForks = ref(false)
+const isSortedByCreatedDate = ref(false)
 const isDefaultOrder = ref(true)
 
-// 検索ボタンが押されたときの処理
+// 検索処理
 const searchRepos = async (page = 1) => {
-    // 入力チェック
-    if (!title.value && !language.value) {
-        errorMessage.value = 'リポジトリ名または言語を入力してください。'
+    if (!title.value && !language.value && !username.value) {
+        errorMessage.value = 'リポジトリ名、言語、またはユーザー名を入力してください。'
         return
     }
-
-    // エラーがなければメッセージをリセット
     errorMessage.value = ''
     isSortedByStars.value = false
     isSortedByForks.value = false
-    isDefaultOrder.value = true // 検索時はデフォルト順
+    isSortedByCreatedDate.value = false
+    isDefaultOrder.value = true // デフォルト順
 
     try {
         let q = 'in:name'
-        if (title.value) {
-            q += `+${title.value}`
-        }
-        if (language.value) {
-            q += `+language:${language.value}`
-        }
-        q += '+is:public'
+        if (title.value) q += `+${title.value}`
+        if (language.value) q += `+language:${language.value}`
+        if (username.value) q += `+user:${username.value}`
 
         const url = `https://api.github.com/search/repositories?q=${q}&per_page=${itemsPerPage.value}&page=${page}`
         const res = await axios.get(url)
         repos.value = res.data.items
-        totalCount.value = res.data.total_count // 合計ヒット件数を取得
+        totalCount.value = res.data.total_count // 総件数を取得
         currentPage.value = page
     } catch (error) {
         console.error(error)
@@ -158,32 +159,42 @@ const searchRepos = async (page = 1) => {
     }
 }
 
-// ページを変更する処理
-const changePage = (page) => {
-    searchRepos(page)
-}
-
-// 星の数降順で並べ替え
+// 並び替え処理
 const sortByStars = () => {
     repos.value.sort((a, b) => b.stargazers_count - a.stargazers_count)
     isSortedByStars.value = true
     isSortedByForks.value = false
+    isSortedByCreatedDate.value = false
     isDefaultOrder.value = false
 }
 
-// フォーク数降順で並べ替え
 const sortByForks = () => {
     repos.value.sort((a, b) => b.forks_count - a.forks_count)
     isSortedByForks.value = true
     isSortedByStars.value = false
+    isSortedByCreatedDate.value = false
+    isDefaultOrder.value = false
+}
+
+const sortByCreatedDate = () => {
+    repos.value.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    isSortedByCreatedDate.value = true
+    isSortedByStars.value = false
+    isSortedByForks.value = false
     isDefaultOrder.value = false
 }
 
 // デフォルト順に戻す処理
 const resetToDefault = () => {
-    searchRepos(currentPage.value)
+    searchRepos(currentPage.value) // 現在のページを再取得
     isDefaultOrder.value = true
     isSortedByStars.value = false
     isSortedByForks.value = false
+    isSortedByCreatedDate.value = false
+}
+
+// ページ移動処理
+const changePage = (page) => {
+    searchRepos(page)
 }
 </script>
