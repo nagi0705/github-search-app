@@ -42,6 +42,9 @@
                     class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
                     📅 作成日降順で並べ替え
                 </button>
+                <button @click="toggleOrder" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    {{ isAscending ? '降順' : '昇順' }}に切り替え
+                </button>
                 <button @click="resetToDefault" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                     🔄 デフォルト順に戻す
                 </button>
@@ -49,13 +52,13 @@
 
             <!-- 並び替え状態の表示 -->
             <p v-if="isSortedByStars" class="text-center text-sm mt-2">
-                現在、⭐ 星の数降順で表示中です。
+                現在、⭐ 星の数{{ isAscending ? '昇順' : '降順' }}で表示中です。
             </p>
             <p v-if="isSortedByForks" class="text-center text-sm mt-2">
-                現在、🍴 フォーク数降順で表示中です。
+                現在、🍴 フォーク数{{ isAscending ? '昇順' : '降順' }}で表示中です。
             </p>
             <p v-if="isSortedByCreatedDate" class="text-center text-sm mt-2">
-                現在、📅 作成日降順で表示中です。
+                現在、📅 作成日{{ isAscending ? '昇順' : '降順' }}で表示中です。
             </p>
             <p v-if="isDefaultOrder" class="text-center text-sm mt-2">
                 現在、🔄 デフォルト順で表示中です。
@@ -129,6 +132,7 @@ const isSortedByStars = ref(false)
 const isSortedByForks = ref(false)
 const isSortedByCreatedDate = ref(false)
 const isDefaultOrder = ref(true)
+const isAscending = ref(false) // 昇順か降順か
 
 // 検索処理
 const searchRepos = async (page = 1) => {
@@ -161,7 +165,11 @@ const searchRepos = async (page = 1) => {
 
 // 並び替え処理
 const sortByStars = () => {
-    repos.value.sort((a, b) => b.stargazers_count - a.stargazers_count)
+    repos.value.sort((a, b) =>
+        isAscending.value
+            ? a.stargazers_count - b.stargazers_count
+            : b.stargazers_count - a.stargazers_count
+    )
     isSortedByStars.value = true
     isSortedByForks.value = false
     isSortedByCreatedDate.value = false
@@ -169,7 +177,9 @@ const sortByStars = () => {
 }
 
 const sortByForks = () => {
-    repos.value.sort((a, b) => b.forks_count - a.forks_count)
+    repos.value.sort((a, b) =>
+        isAscending.value ? a.forks_count - b.forks_count : b.forks_count - a.forks_count
+    )
     isSortedByForks.value = true
     isSortedByStars.value = false
     isSortedByCreatedDate.value = false
@@ -177,11 +187,27 @@ const sortByForks = () => {
 }
 
 const sortByCreatedDate = () => {
-    repos.value.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    repos.value.sort((a, b) =>
+        isAscending.value
+            ? new Date(a.created_at) - new Date(b.created_at)
+            : new Date(b.created_at) - new Date(a.created_at)
+    )
     isSortedByCreatedDate.value = true
     isSortedByStars.value = false
     isSortedByForks.value = false
     isDefaultOrder.value = false
+}
+
+// 昇順/降順切り替え
+const toggleOrder = () => {
+    isAscending.value = !isAscending.value
+    if (isSortedByStars.value) {
+        sortByStars()
+    } else if (isSortedByForks.value) {
+        sortByForks()
+    } else if (isSortedByCreatedDate.value) {
+        sortByCreatedDate()
+    }
 }
 
 // デフォルト順に戻す処理
@@ -191,6 +217,7 @@ const resetToDefault = () => {
     isSortedByStars.value = false
     isSortedByForks.value = false
     isSortedByCreatedDate.value = false
+    isAscending.value = false // デフォルトは降順
 }
 
 // ページ移動処理
