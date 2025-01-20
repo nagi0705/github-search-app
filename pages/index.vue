@@ -28,6 +28,7 @@
                     🔄 デフォルト順に戻す
                 </button>
             </div>
+
             <!-- 並び替え状態の表示 -->
             <p v-if="isSortedByStars" class="text-center text-sm mt-2">
                 現在、⭐ 星の数降順で表示中です。
@@ -39,9 +40,28 @@
                 現在、🔄 デフォルト順で表示中です。
             </p>
 
+            <!-- 現在の表示状況 -->
+            <p v-if="totalCount" class="text-center text-sm mt-4">
+                {{ totalCount }}件中
+                {{ (currentPage - 1) * itemsPerPage.value + 1 }}〜{{ Math.min(currentPage * itemsPerPage.value,
+                totalCount) }}件を表示中
+            </p>
+
             <!-- エラーメッセージ -->
             <div v-if="errorMessage" class="text-center text-red-400 mb-4">
                 {{ errorMessage }}
+            </div>
+
+            <!-- 1ページ表示件数の選択 -->
+            <div v-if="repos.length > 0" class="flex justify-center items-center gap-4 mt-4">
+                <label for="itemsPerPage" class="text-sm">1ページ表示件数:</label>
+                <select id="itemsPerPage" v-model="itemsPerPage" @change="updateItemsPerPage"
+                    class="bg-white text-black p-2 rounded">
+                    <option value="10">10件</option>
+                    <option value="20">20件</option>
+                    <option value="30">30件</option>
+                    <option value="50">50件</option>
+                </select>
             </div>
 
             <!-- 検索結果リスト -->
@@ -96,6 +116,9 @@ const currentPage = ref(1)
 // 1ページあたりの表示件数
 const itemsPerPage = ref(30)
 
+// 検索結果の総件数
+const totalCount = ref(0)
+
 // 並び替えフラグ
 const isSortedByStars = ref(false)
 const isSortedByForks = ref(false)
@@ -119,6 +142,7 @@ const searchRepos = async (page = 1) => {
         const url = `https://api.github.com/search/repositories?q=${q}&per_page=${itemsPerPage.value}&page=${page}`
         const res = await axios.get(url)
         repos.value = res.data.items
+        totalCount.value = res.data.total_count // 総件数を取得
         currentPage.value = page
     } catch (error) {
         console.error(error)
@@ -147,6 +171,11 @@ const resetToDefault = () => {
     isDefaultOrder.value = true
     isSortedByStars.value = false
     isSortedByForks.value = false
+}
+
+// 表示件数変更処理
+const updateItemsPerPage = () => {
+    searchRepos(1) // 1ページ目から再取得
 }
 
 // ページ移動処理
