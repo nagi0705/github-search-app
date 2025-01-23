@@ -19,9 +19,9 @@
             </div>
 
             <!-- ソートボタンと表示件数選択 -->
-            <div class="flex justify-center items-center mb-6">
+            <div class="flex flex-col sm:flex-row justify-center items-center mb-6">
                 <!-- 中央: ソートボタン -->
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2 justify-center">
                     <NButton size="large" variant="solid" @click="sortByStars"
                         :class="{ 'bg-purple-300 text-white': isSortedByStars, 'bg-white text-black hover:bg-purple-500': !isSortedByStars }">
                         <span class="material-icons">star</span> 星の数

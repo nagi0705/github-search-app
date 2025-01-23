@@ -1,0 +1,9 @@
+@media (max-width: 640px) {
+  .container {
+    padding: 0 1rem;
+  }
+  .text-center {
+    text-align: center;
+  }
+  /* 他のスタイル調整 */
+} 
