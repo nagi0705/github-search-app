@@ -5,15 +5,15 @@
             <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6">GitHub リポジトリ検索</h1>
 
             <!-- 検索フォーム -->
-            <div class="flex flex-wrap justify-center gap-4 mb-6">
+            <div class="flex flex-wrap justify-center gap-6 mb-8">
                 <input v-model="title" type="text" placeholder="リポジトリ名 (例: vue)"
-                    class="w-full sm:w-auto p-2 rounded bg-white text-black" />
+                    class="w-full sm:w-auto p-4 rounded bg-white text-black" />
                 <input v-model="language" type="text" placeholder="言語 (例: javascript)"
-                    class="w-full sm:w-auto p-2 rounded bg-white text-black" />
+                    class="w-full sm:w-auto p-4 rounded bg-white text-black" />
                 <input v-model="username" type="text" placeholder="ユーザー名 (例: torvalds)"
-                    class="w-full sm:w-auto p-2 rounded bg-white text-black" />
+                    class="w-full sm:w-auto p-4 rounded bg-white text-black" />
                 <button @click="searchRepos(1)"
-                    class="w-full sm:w-auto bg-stone-500 text-white px-4 py-2 rounded hover:bg-rose-600">
+                    class="w-full sm:w-auto bg-stone-500 text-white px-6 py-3 rounded hover:bg-rose-600">
                     検索
                 </button>
             </div>
@@ -34,54 +34,64 @@
             <div class="flex justify-center items-center gap-4 mb-6">
                 <!-- 星の数でソート -->
                 <NButton
-                    size="sm"
-                    variant="soft"
-                    :class="{ 'text-yellow-600': isSortedByStars }"
+                    size="large"
+                    variant="solid"
+                    color="yellow"
+                    class="hover:shadow-lg"
+                    :class="{ 'bg-yellow-500 text-white': isSortedByStars, 'bg-gray-200 text-black': !isSortedByStars }"
                     @click="sortByStars"
                 >
-                    <span class="material-icons">star</span>
+                    <span class="material-icons text-xl">star</span>
                     星の数
                 </NButton>
 
                 <!-- フォーク数でソート -->
                 <NButton
-                    size="sm"
-                    variant="soft"
-                    :class="{ 'text-green-600': isSortedByForks }"
+                    size="large"
+                    variant="solid"
+                    color="green"
+                    class="hover:shadow-lg"
+                    :class="{ 'bg-green-500 text-white': isSortedByForks, 'bg-gray-200 text-black': !isSortedByForks }"
                     @click="sortByForks"
                 >
-                    <span class="material-icons">call_split</span>
+                    <span class="material-icons text-xl">call_split</span>
                     フォーク数
                 </NButton>
 
                 <!-- 作成日でソート -->
                 <NButton
-                    size="sm"
-                    variant="soft"
-                    :class="{ 'text-purple-600': isSortedByCreatedDate }"
+                    size="large"
+                    variant="solid"
+                    color="purple"
+                    class="hover:shadow-lg"
+                    :class="{ 'bg-purple-500 text-white': isSortedByCreatedDate, 'bg-gray-200 text-black': !isSortedByCreatedDate }"
                     @click="sortByCreatedDate"
                 >
-                    <span class="material-icons">calendar_today</span>
+                    <span class="material-icons text-xl">calendar_today</span>
                     作成日
                 </NButton>
 
                 <!-- 昇順/降順切り替え -->
                 <NButton
-                    size="sm"
-                    variant="soft"
+                    size="large"
+                    variant="solid"
+                    color="blue"
+                    class="hover:shadow-lg"
                     @click="toggleOrder"
                 >
-                    <span class="material-icons">{{ isAscending ? 'arrow_upward' : 'arrow_downward' }}</span>
+                    <span class="material-icons text-xl">{{ isAscending ? 'arrow_upward' : 'arrow_downward' }}</span>
                     {{ isAscending ? '昇順' : '降順' }}
                 </NButton>
 
                 <!-- デフォルト順 -->
                 <NButton
-                    size="sm"
-                    variant="soft"
+                    size="large"
+                    variant="solid"
+                    color="gray"
+                    class="hover:shadow-lg"
                     @click="resetToDefault"
                 >
-                    <span class="material-icons">autorenew</span>
+                    <span class="material-icons text-xl">autorenew</span>
                     デフォルト
                 </NButton>
             </div>
@@ -265,8 +275,7 @@ const changePage = (page) => {
 
 <style scoped>
 .material-icons {
-  font-size: 1.5rem;
-  vertical-align: middle;
+  font-size: 1.8rem;
   margin-right: 0.5rem;
 }
 </style>
