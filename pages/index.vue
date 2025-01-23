@@ -7,93 +7,70 @@
             <!-- 検索フォーム -->
             <div class="flex flex-wrap justify-center gap-6 mb-8">
                 <input v-model="title" type="text" placeholder="リポジトリ名 (例: vue)"
-                    class="w-full sm:w-auto p-4 rounded bg-white text-black" />
+                    class="w-full sm:w-auto p-4 rounded bg-white text-black" @keyup.enter="searchRepos(1)" />
                 <input v-model="language" type="text" placeholder="言語 (例: javascript)"
-                    class="w-full sm:w-auto p-4 rounded bg-white text-black" />
+                    class="w-full sm:w-auto p-4 rounded bg-white text-black" @keyup.enter="searchRepos(1)" />
                 <input v-model="username" type="text" placeholder="ユーザー名 (例: torvalds)"
-                    class="w-full sm:w-auto p-4 rounded bg-white text-black" />
+                    class="w-full sm:w-auto p-4 rounded bg-white text-black" @keyup.enter="searchRepos(1)" />
                 <button @click="searchRepos(1)"
                     class="w-full sm:w-auto bg-stone-500 text-white px-6 py-3 rounded hover:bg-rose-600">
                     検索
                 </button>
             </div>
 
-            <!-- 表示件数選択 -->
-            <div class="flex justify-center items-center gap-4 mb-6">
-                <label for="itemsPerPage" class="text-sm">1ページ表示件数:</label>
-                <select id="itemsPerPage" v-model="itemsPerPage" @change="searchRepos(1)"
-                    class="p-2 rounded bg-white text-black">
-                    <option value="10">10件</option>
-                    <option value="20">20件</option>
-                    <option value="30">30件</option>
-                    <option value="50">50件</option>
-                </select>
-            </div>
+            <!-- ソートボタンと表示件数選択 -->
+            <div class="flex justify-center items-center mb-6">
+                <!-- 中央: ソートボタン -->
+                <div class="flex gap-2">
+                    <NButton size="large" variant="solid" @click="sortByStars"
+                        :class="{ 'bg-purple-300 text-white': isSortedByStars, 'bg-white text-black hover:bg-purple-500': !isSortedByStars }">
+                        <span class="material-icons">star</span> 星の数
+                    </NButton>
+                    <NButton size="large" variant="solid" @click="sortByForks"
+                        :class="{ 'bg-purple-300 text-white': isSortedByForks, 'bg-white text-black hover:bg-purple-500': !isSortedByForks }">
+                        <span class="material-icons">call_split</span> フォーク数
+                    </NButton>
+                    <NButton size="large" variant="solid" @click="sortByCreatedDate"
+                        :class="{ 'bg-purple-300 text-white': isSortedByCreatedDate, 'bg-white text-black hover:bg-purple-500': !isSortedByCreatedDate }">
+                        <span class="material-icons">calendar_today</span> 作成日
+                    </NButton>
+                    <NButton size="large" variant="solid" class="hover:shadow-lg"
+                        :class="{ 'bg-purple-300 text-white': isSortedByOpenIssues, 'bg-white text-black hover:bg-purple-500': !isSortedByOpenIssues }"
+                        @click="sortByOpenIssues">
+                        <span class="material-icons text-xl">code_off</span>
+                        Open Issue数
+                    </NButton>
 
-            <!-- 並べ替えボタン -->
-            <div class="flex justify-center items-center gap-4 mb-6">
-                <!-- 星の数でソート -->
-                <NButton
-                    size="large"
-                    variant="solid"
-                    color="yellow"
-                    class="hover:shadow-lg"
-                    :class="{ 'bg-yellow-500 text-white': isSortedByStars, 'bg-gray-200 text-black': !isSortedByStars }"
-                    @click="sortByStars"
-                >
-                    <span class="material-icons text-xl">star</span>
-                    星の数
-                </NButton>
+                    <NButton size="large" variant="solid" class="hover:shadow-lg"
+                        :class="{ 'bg-purple-300 text-white': isSortedByTotalIssues, 'bg-white text-black hover:bg-purple-500': !isSortedByTotalIssues }"
+                        @click="sortByTotalIssues">
+                        <span class="material-icons text-xl">code</span>
+                        Total Issue数
+                    </NButton>
 
-                <!-- フォーク数でソート -->
-                <NButton
-                    size="large"
-                    variant="solid"
-                    color="green"
-                    class="hover:shadow-lg"
-                    :class="{ 'bg-green-500 text-white': isSortedByForks, 'bg-gray-200 text-black': !isSortedByForks }"
-                    @click="sortByForks"
-                >
-                    <span class="material-icons text-xl">call_split</span>
-                    フォーク数
-                </NButton>
+                    <NButton size="large" variant="solid" class="hover:shadow-lg"
+                        :class="{ 'bg-purple-300 text-white': isSortedByUpdatedDate, 'bg-white text-black hover:bg-purple-500': !isSortedByUpdatedDate }"
+                        @click="sortByUpdatedDate">
+                        <span class="material-icons text-xl">update</span>
+                        更新日順
+                    </NButton>
+                    <NButton size="large" variant="solid" color="purple" @click="toggleOrder">
+                        <span class="material-icons">{{ isAscending ? 'arrow_upward' : 'arrow_downward' }}</span>
+                        {{ isAscending ? '昇順' : '降順' }}
+                    </NButton>
+                    <NButton size="large" variant="solid" @click="resetToDefault" class="mr-4"
+                        :class="{ 'bg-purple-300 text-white': isDefaultOrder, 'bg-white text-black hover:bg-purple-500': !isDefaultOrder }">
+                        <span class="material-icons">autorenew</span> デフォルト
+                    </NButton>
 
-                <!-- 作成日でソート -->
-                <NButton
-                    size="large"
-                    variant="solid"
-                    color="purple"
-                    class="hover:shadow-lg"
-                    :class="{ 'bg-purple-500 text-white': isSortedByCreatedDate, 'bg-gray-200 text-black': !isSortedByCreatedDate }"
-                    @click="sortByCreatedDate"
-                >
-                    <span class="material-icons text-xl">calendar_today</span>
-                    作成日
-                </NButton>
-
-                <!-- 昇順/降順切り替え -->
-                <NButton
-                    size="large"
-                    variant="solid"
-                    color="blue"
-                    class="hover:shadow-lg"
-                    @click="toggleOrder"
-                >
-                    <span class="material-icons text-xl">{{ isAscending ? 'arrow_upward' : 'arrow_downward' }}</span>
-                    {{ isAscending ? '昇順' : '降順' }}
-                </NButton>
-
-                <!-- デフォルト順 -->
-                <NButton
-                    size="large"
-                    variant="solid"
-                    color="gray"
-                    class="hover:shadow-lg"
-                    @click="resetToDefault"
-                >
-                    <span class="material-icons text-xl">autorenew</span>
-                    デフォルト
-                </NButton>
+                    <select id="itemsPerPage" v-model="itemsPerPage" @change="searchRepos(1)"
+                        class="p-2 rounded bg-white text-black border border-gray-300 ml-4">
+                        <option value="20">20件</option>
+                        <option value="50">50件</option>
+                        <option value="100">100件</option>
+                        <option value="200">200件</option>
+                    </select>
+                </div>
             </div>
 
             <!-- 並び替え状態の表示 -->
@@ -106,14 +83,23 @@
             <p v-if="isSortedByCreatedDate" class="text-center text-sm mt-2">
                 現在、📅 作成日{{ isAscending ? '昇順' : '降順' }}で表示中です。
             </p>
+            <p v-if="isSortedByOpenIssues" class="text-center text-sm mt-2">
+                現在、🐛 Open Issue数{{ isAscending ? '昇順' : '降順' }}で表示中です。
+            </p>
+            <p v-if="isSortedByTotalIssues" class="text-center text-sm mt-2">
+                現在、🐛 Total Issue数{{ isAscending ? '昇順' : '降順' }}で表示中です。
+            </p>
+            <p v-if="isSortedByUpdatedDate" class="text-center text-sm mt-2">
+                現在、🔄 更新日順{{ isAscending ? '昇順' : '降順' }}で表示中です。
+            </p>
             <p v-if="isDefaultOrder" class="text-center text-sm mt-2">
-                現在、🔄 デフォルト順で表示中です。
+                現在、 デフォルト順で表示中です。
             </p>
 
             <!-- ヒット件数表示 -->
             <div v-if="totalCount > 0" class="text-center text-sm text-white mb-4">
                 {{ totalCount }}件中 {{ (currentPage - 1) * itemsPerPage + 1 }}〜{{ Math.min(currentPage * itemsPerPage,
-                    totalCount) }}件を表示中
+                totalCount) }}件を表示中
             </div>
 
             <!-- 検索結果リスト -->
@@ -123,8 +109,9 @@
                         {{ repo.full_name }}
                     </a>
                     <div class="mt-2">
-                        ⭐ {{ repo.stargazers_count }} | 🍴 {{ repo.forks_count }} | 📅 作成日:
-                        {{ new Date(repo.created_at).toLocaleDateString() }}
+                        ⭐ {{ repo.stargazers_count }} | 🍴 {{ repo.forks_count }} | 🐛 Open Issue数: {{
+                        repo.open_issues_count }} | 📅 更新日:
+                        {{ new Date(repo.updated_at).toLocaleDateString() }}
                     </div>
                 </li>
             </ul>
@@ -169,7 +156,7 @@ const errorMessage = ref('')
 const currentPage = ref(1)
 
 // 1ページあたりの表示件数
-const itemsPerPage = ref(30)
+const itemsPerPage = ref(20)
 
 // 検索結果の総件数
 const totalCount = ref(0)
@@ -178,6 +165,9 @@ const totalCount = ref(0)
 const isSortedByStars = ref(false)
 const isSortedByForks = ref(false)
 const isSortedByCreatedDate = ref(false)
+const isSortedByOpenIssues = ref(false)
+const isSortedByTotalIssues = ref(false)
+const isSortedByUpdatedDate = ref(false)
 const isDefaultOrder = ref(true)
 const isAscending = ref(false) // 昇順か降順か
 
@@ -191,6 +181,9 @@ const searchRepos = async (page = 1) => {
     isSortedByStars.value = false
     isSortedByForks.value = false
     isSortedByCreatedDate.value = false
+    isSortedByOpenIssues.value = false
+    isSortedByTotalIssues.value = false
+    isSortedByUpdatedDate.value = false
     isDefaultOrder.value = true // デフォルト順
 
     try {
@@ -220,6 +213,9 @@ const sortByStars = () => {
     isSortedByStars.value = true
     isSortedByForks.value = false
     isSortedByCreatedDate.value = false
+    isSortedByOpenIssues.value = false
+    isSortedByTotalIssues.value = false
+    isSortedByUpdatedDate.value = false
     isDefaultOrder.value = false
 }
 
@@ -230,6 +226,9 @@ const sortByForks = () => {
     isSortedByForks.value = true
     isSortedByStars.value = false
     isSortedByCreatedDate.value = false
+    isSortedByOpenIssues.value = false
+    isSortedByTotalIssues.value = false
+    isSortedByUpdatedDate.value = false
     isDefaultOrder.value = false
 }
 
@@ -242,6 +241,54 @@ const sortByCreatedDate = () => {
     isSortedByCreatedDate.value = true
     isSortedByStars.value = false
     isSortedByForks.value = false
+    isSortedByOpenIssues.value = false
+    isSortedByTotalIssues.value = false
+    isSortedByUpdatedDate.value = false
+    isDefaultOrder.value = false
+}
+
+const sortByOpenIssues = () => {
+    repos.value.sort((a, b) =>
+        isAscending.value
+            ? a.open_issues_count - b.open_issues_count
+            : b.open_issues_count - a.open_issues_count
+    )
+    isSortedByOpenIssues.value = true
+    isSortedByStars.value = false
+    isSortedByForks.value = false
+    isSortedByCreatedDate.value = false
+    isSortedByTotalIssues.value = false
+    isSortedByUpdatedDate.value = false
+    isDefaultOrder.value = false
+}
+
+const sortByTotalIssues = () => {
+    repos.value.sort((a, b) =>
+        isAscending.value
+            ? (a.open_issues_count + (a.closed_issues_count || 0)) - (b.open_issues_count + (b.closed_issues_count || 0))
+            : (b.open_issues_count + (b.closed_issues_count || 0)) - (a.open_issues_count + (a.closed_issues_count || 0))
+    )
+    isSortedByTotalIssues.value = true
+    isSortedByStars.value = false
+    isSortedByForks.value = false
+    isSortedByCreatedDate.value = false
+    isSortedByOpenIssues.value = false
+    isSortedByUpdatedDate.value = false
+    isDefaultOrder.value = false
+}
+
+const sortByUpdatedDate = () => {
+    repos.value.sort((a, b) =>
+        isAscending.value
+            ? new Date(a.updated_at) - new Date(b.updated_at)
+            : new Date(b.updated_at) - new Date(a.updated_at)
+    )
+    isSortedByUpdatedDate.value = true
+    isSortedByStars.value = false
+    isSortedByForks.value = false
+    isSortedByCreatedDate.value = false
+    isSortedByOpenIssues.value = false
+    isSortedByTotalIssues.value = false
     isDefaultOrder.value = false
 }
 
@@ -254,6 +301,12 @@ const toggleOrder = () => {
         sortByForks()
     } else if (isSortedByCreatedDate.value) {
         sortByCreatedDate()
+    } else if (isSortedByOpenIssues.value) {
+        sortByOpenIssues()
+    } else if (isSortedByTotalIssues.value) {
+        sortByTotalIssues()
+    } else if (isSortedByUpdatedDate.value) {
+        sortByUpdatedDate()
     }
 }
 
@@ -264,6 +317,9 @@ const resetToDefault = () => {
     isSortedByStars.value = false
     isSortedByForks.value = false
     isSortedByCreatedDate.value = false
+    isSortedByOpenIssues.value = false
+    isSortedByTotalIssues.value = false
+    isSortedByUpdatedDate.value = false
     isAscending.value = false // デフォルトは降順
 }
 
