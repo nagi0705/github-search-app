@@ -32,22 +32,58 @@
 
             <!-- 並べ替えボタン -->
             <div class="flex justify-center items-center gap-4 mb-6">
-                <button @click="sortByStars" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                    ⭐ 星の数降順で並べ替え
-                </button>
-                <button @click="sortByForks" class="bg-green-500 text-black px-4 py-2 rounded hover:bg-green-600">
-                    🍴 フォーク数降順で並べ替え
-                </button>
-                <button @click="sortByCreatedDate"
-                    class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
-                    📅 作成日降順で並べ替え
-                </button>
-                <button @click="toggleOrder" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                    {{ isAscending ? '降順' : '昇順' }}に切り替え
-                </button>
-                <button @click="resetToDefault" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    🔄 デフォルト順に戻す
-                </button>
+                <!-- 星の数でソート -->
+                <NButton
+                    size="sm"
+                    variant="soft"
+                    :class="{ 'text-yellow-600': isSortedByStars }"
+                    @click="sortByStars"
+                >
+                    <span class="material-icons">star</span>
+                    星の数
+                </NButton>
+
+                <!-- フォーク数でソート -->
+                <NButton
+                    size="sm"
+                    variant="soft"
+                    :class="{ 'text-green-600': isSortedByForks }"
+                    @click="sortByForks"
+                >
+                    <span class="material-icons">call_split</span>
+                    フォーク数
+                </NButton>
+
+                <!-- 作成日でソート -->
+                <NButton
+                    size="sm"
+                    variant="soft"
+                    :class="{ 'text-purple-600': isSortedByCreatedDate }"
+                    @click="sortByCreatedDate"
+                >
+                    <span class="material-icons">calendar_today</span>
+                    作成日
+                </NButton>
+
+                <!-- 昇順/降順切り替え -->
+                <NButton
+                    size="sm"
+                    variant="soft"
+                    @click="toggleOrder"
+                >
+                    <span class="material-icons">{{ isAscending ? 'arrow_upward' : 'arrow_downward' }}</span>
+                    {{ isAscending ? '昇順' : '降順' }}
+                </NButton>
+
+                <!-- デフォルト順 -->
+                <NButton
+                    size="sm"
+                    variant="soft"
+                    @click="resetToDefault"
+                >
+                    <span class="material-icons">autorenew</span>
+                    デフォルト
+                </NButton>
             </div>
 
             <!-- 並び替え状態の表示 -->
@@ -105,6 +141,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { NButton } from 'naive-ui'
 import axios from 'axios'
 
 // 検索フォーム入力
@@ -225,3 +262,11 @@ const changePage = (page) => {
     searchRepos(page)
 }
 </script>
+
+<style scoped>
+.material-icons {
+  font-size: 1.5rem;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+</style>
